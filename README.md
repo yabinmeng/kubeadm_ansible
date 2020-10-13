@@ -20,5 +20,5 @@ In this repo., I'm going to automate the K8s cluster setup procedure using Ansib
 ## Usage
 
 ```
-ansible-playbook -i hosts.ini <playbook_yaml> --private-key=<ssh_private_key> -u <ssh_user>
+$ ansible-playbook -i hosts.ini <playbook_yaml> --private-key=<ssh_private_key> -u <ssh_user>
 ```
