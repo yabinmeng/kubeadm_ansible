@@ -1,0 +1,60 @@
+---
+- hosts: my_k8s_cluster
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  tasks:
+  - name: Make sure pip is installed 
+    apt:
+      name: python-pip
+      update_cache: yes
+      state: present
+  # This is required by k8s module
+  - name: Install Python openshift module
+    pip:
+      name: openshift
+      extra_args: 
+        --ignore-installed
+  - name: Create folder $HOME/.kube
+    file:
+      path: "/home/{{ ansible_env.SUDO_USER }}/.kube"
+      state: directory
+      owner: "{{ ansible_env.SUDO_USER }}"
+      group: "{{ ansible_env.SUDO_USER }}"
+      mode: 0755
+
+  roles:
+    - { role: precondition_chk }
+    - { role: docker_runtime }
+    - { role: install_kubeadm }
+
+- hosts: master_nodes
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  collections:
+    - community.kubernetes
+  tasks:
+    - name: Copy from remote (/etc/kubernetes/admin.conf) to local (/tmp/admin.conf)
+      fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: /tmp/
+        force: yes
+        flat: true
+  roles:
+    - { role: init_cfg_master }
+    - { role: install_k8s_calico }
+    - { role: k8s_token_cert }
+
+- hosts: worker_nodes
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Fecth from local (/tmp/admin.conf) to remote ($HOME/.kube/config)
+      copy:
+        src: /tmp/admin.conf
+        dest: /home/{{ ansible_env.SUDO_USER }}/.kube/config
+        force: yes
+  roles:
+   - { role: join_worker }

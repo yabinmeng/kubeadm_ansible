@@ -1,0 +1,72 @@
+---
+- hosts: master_nodes
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  run_once: true
+  serial: true
+  environment:
+    KUBECONFIG: /home/{{ ansible_env.SUDO_USER }}/.kube/config
+  tasks:
+  - name: Get K8s node list
+    shell:
+      kubectl get nodes | tail -n +2 | awk '{print $1}'
+    register:
+      k8s_node_list
+  
+  - name: Set node list to a fact
+    set_fact:
+      node_list: "{{ k8s_node_list.stdout_lines }}" 
+  #- debug: msg={{ node_list }}
+
+  - name: Drain K8s nodes
+    shell:
+      kubectl drain {{ item }} --delete-local-data --force --ignore-daemonsets
+    with_items:
+      - "{{ node_list }}"
+  
+- hosts: worker_nodes
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  environment:
+    KUBECONFIG: /home/{{ ansible_env.SUDO_USER }}/.kube/config
+  tasks:
+    - name: Reset "kubeadm" state from "kubeadm join"
+      shell:
+        kubeadm reset -f
+      register:
+        kubeadm_reset_shell
+
+- hosts: master_nodes
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  run_once: true
+  environment:
+    KUBECONFIG: /home/{{ ansible_env.SUDO_USER }}/.kube/config
+  tasks:
+    - name: Delete K8s worker nodes
+      async: 60
+      poll: 60
+      shell:
+        kubectl delete node {{ item }}
+      with_items:
+        - "{{ node_list[1:] }}"
+
+    - name: Reset "kubeadm" state from "kubeadm init"
+      shell:
+        kubeadm reset -f
+      register:
+        kubeadm_reset_shell
+    #- debug: msg={{ kubeadm_reset_shell }}
+
+- hosts: my_k8s_cluster
+  any_errors_fatal: true
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Reset iptables and IPVS tables
+      shell:
+        iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X;
+        ipvsadm -C

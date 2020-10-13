@@ -1,0 +1,14 @@
+--- 
+# - name: Download calico.yaml file
+#   get_url:
+#     url: "https://docs.projectcalico.org/v{{ calico_ver_maj }}/manifests/calico.yaml"
+#     dest: /tmp/
+
+- name: Install K8s network Calico
+  environment:
+    KUBECONFIG: /home/{{ ansible_env.SUDO_USER }}/.kube/config
+  shell:
+    kubectl apply -f "https://docs.projectcalico.org/v{{ calico_ver_maj }}/manifests/calico.yaml"
+  register:
+    calico_apply_result
+#- debug: msg={{ calico_apply_result }}  

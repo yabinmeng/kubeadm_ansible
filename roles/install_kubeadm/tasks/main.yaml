@@ -1,0 +1,31 @@
+---
+- name: Add Google GPG key
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+
+- name: Add Google's's Debian Repository
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+
+- name: Install kubeadm, kubelet, and kubectl - version {{ k8s_ver }}
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    force: yes
+  with_items:
+    - kubeadm={{ k8s_ver }}-00
+    - kubelet={{ k8s_ver }}-00
+    - kubectl={{ k8s_ver }}-00
+
+# Ansile apt package does NOT have support for "mark" yet
+# -- Do NOT recommend to use "apt" in shell command
+#- name: Prevent changes to kubexxx packages
+#  shell: apt mark hold kubelet kubeadm kubectl
+
+#- name: Restart kubelet
+#  systemd:
+#    name: kubelet
+#    state: reloaded

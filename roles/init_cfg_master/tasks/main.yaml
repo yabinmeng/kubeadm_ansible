@@ -1,0 +1,51 @@
+---
+- name: Check whether KubeAPI server is up and running (port 6443)
+  # by design, grep returns code 1 if the given string is not found 
+  ignore_errors: yes
+  shell:
+    netstat -ntlp | grep 6443
+  register: 
+    kubeapi_port_chk
+#- debug: msg={{ kubeapi_port_chk }}
+
+- name: Initialize K8s control plane node, if not initialized
+  shell: 
+    kubeadm init --pod-network-cidr={{ pod_net_cidr }} --ignore-preflight-errors {{ kinit_errors_to_ignore }}
+  register: kubeadm_init_result
+  when:
+    - kubeapi_port_chk.stdout == ""
+#- debug: msg={{ kubeadm_init_result }}
+
+##
+# Make kubectl working for root user
+##
+# - name: Set KUBECONFIG system environment variable
+#   lineinfile:
+#     path: /etc/environment
+#     regexp: '^KUBECONFIG='
+#     line: KUBECONFIG=/etc/kubernetes/admin.conf
+#
+# - name: Echo KUBECONFIG system environment variable
+#   shell:
+#     echo $KUBECONFIG
+#   register:
+#     echo_shell_result
+# - debug: msg={{ echo_shell_result }}
+
+##
+# Make kubectl working for non-root user
+## 
+- name: Copy /etc/kubernetes/admin.conf to $HOME/.kube/config
+  copy:
+    remote_src: True
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ ansible_env.SUDO_USER }}/.kube/config"
+    owner: "{{ ansible_env.SUDO_USER }}"
+    group: "{{ ansible_env.SUDO_USER }}"
+    mode: 0644
+
+- name: Wait for KubeAPI server port is ready
+  wait_for:
+    port: 6443
+    delay: 5
+    state: started

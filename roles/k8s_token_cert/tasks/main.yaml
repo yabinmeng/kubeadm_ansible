@@ -1,0 +1,26 @@
+---
+- name: Get bootstrap token
+  run_once: true
+  shell: 
+    kubeadm token list --v=5 | tail -n +2 | awk '{print $1}'
+  register:
+    token_shell_result
+#- debug: msg="{{ token_shell_result }}"
+
+## NOTE: set_fact is local!
+- name: Set retrieved token value to a fact
+  run_once: true
+  set_fact: bootstrap_token="{{ token_shell_result.stdout }}"
+#- debug: msg={{ bootstrap_token }}
+
+- name: Get ca_cert value
+  run_once: true
+  shell:
+    openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -{{ cert_hash_type }} -hex | sed 's/^.* //'
+  register:
+    ca_cert_shell_result
+
+- name: Set retrieved ca_cert value to a fact
+  run_once: true
+  set_fact: ca_cert_value="{{ ca_cert_shell_result.stdout }}"
+#- debug: msg={{ ca_cert_value }}

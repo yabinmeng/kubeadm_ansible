@@ -1,0 +1,32 @@
+# k8s version
+k8s_ver: 1.18.9
+
+# calico version
+calico_ver_maj: 3.16
+
+# pod network cidr
+pod_net_cidr: 192.168.0.0/16
+
+# NIC name
+nic_name: eth0
+
+# Master node isolation
+master_node_isolation: false
+
+# URL links for downloading docker
+url_docker_debian_pkg: https://download.docker.com/linux/ubuntu
+
+# K8s init preflight errors to ignore (comma seperated)
+# -- Value "all" to ignore all errors
+kinit_errors_to_ignore: "DirAvailable--var-lib-etcd"
+
+# certificate hash type 
+cert_hash_type: sha256
+
+##
+# Dummy variables that will be chang
+# -------
+# DO NOT change !
+##
+bootstrap_token: DUMMY
+ca_cert_value: DUMMY

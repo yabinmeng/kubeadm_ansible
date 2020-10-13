@@ -1,0 +1,76 @@
+---
+- name: Check whether there is duplicate MAC address (Executed Only Once!)
+  #set_fact:  mac_addresses={%for host in play_hosts%}"{{hostvars[host].ansible_default_ipv4.macaddress}}"{% if not loop.last %},{% endif %}{% endfor %}
+  run_once: true
+  set_fact:
+    dup_macaddr_cnt: "{{ lookup('template', 'dup_macaddr.js2') }}"
+  when: 
+    inventory_hostname == play_hosts[0]
+  
+#- debug: msg="{{ dup_macaddr_cnt }}"
+
+- name: Stop play when there is duplicate MAC address (Executed Only Once!)
+  run_once: true
+  fail:
+    msg: "Duplicate MAC addresss among K8s hosts is NOT allowed!"
+  when: 
+    - inventory_hostname == play_hosts[0]
+    - dup_macaddr_cnt | int != 0
+
+- name: Check if Linux Module **br_netfilter** is enabled
+  shell: lsmod | grep br_netfilter
+  register: lsmod_result
+
+- name: Load br_netfilter module if it is not enabled
+  shell: modprobe br_netfilter
+  when:
+    - lsmod_result.rc | int == 0
+    - lsmod_result.stdout == ""
+
+- name: Make sure each Linux Node's iptables to correctly see bridged traffic
+  copy:
+    dest: "/etc/sysctl.d/k8s.conf"
+    content: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+
+- name: Set vm.swappiness to a very small value and reload sysctl
+  sysctl:
+    name: vm.swappiness
+    value: "1"
+    state: present
+    reload: yes
+
+- name: Check if SWAP is ON
+  shell: swapon --show
+  register: swapchk
+
+- name: Turn off SWAP (temporarily)
+  shell: swapoff -a
+  when:
+    - swapchk.stdout != ""
+
+- name: Remove swapfile from /etc/fstab (permanently)
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+  when:
+    - swapchk.stdout != ""
+
+##
+# This is required by Ansible k8s module
+## 
+- name: Make sure pip is installed 
+  apt:
+    name: python-pip
+    update_cache: yes
+    state: present
+
+- name: Install Python openshift module
+  pip:
+    name: openshift
+    extra_args: 
+      --ignore-installed

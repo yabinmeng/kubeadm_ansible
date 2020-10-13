@@ -1,0 +1,5 @@
+{% set mac_addresses = [] %}
+{% for node in play_hosts %}
+{% set ignored = mac_addresses.append( hostvars[node].ansible_default_ipv4.macaddress ) %}
+{% endfor %}
+{{ play_hosts | length  -  mac_addresses | unique | length }} 
