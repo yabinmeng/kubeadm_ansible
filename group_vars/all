@@ -7,9 +7,6 @@ calico_ver_maj: 3.16
 # pod network cidr
 pod_net_cidr: 192.168.0.0/16
 
-# NIC name
-nic_name: eth0
-
 # Master node isolation
 master_node_isolation: false
 
