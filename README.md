@@ -162,9 +162,9 @@ Now we can access the dashboard webUI through the following URL:
 
 Token based login method is recommended and we can get the token using the following commands:
 
-* Get the first secret in K8s keyspace "kubernetes-dashboard" that is able to log in to the cluster
+* Get any K8s secret of type "kubernetes-dashboard"
 
-  * **NOTE**: any secret of type "**kubernetes.io/service-account-token**" is able to log in the cluster.
+  * **NOTE**: Secrets with type "**kubernetes.io/service-account-token**" are able to log into the cluster. But they may have different access control privileges.
 
 ```
 $ kubectl --kubeconfig=./kubeconfig -n kubernetes-dashboard get secrets --field-selector type=kubernetes.io/service-account-token
