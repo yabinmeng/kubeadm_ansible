@@ -158,5 +158,5 @@ Now we can access the dashboard webUI through the following URL:
 
 **NOTE** that Kubectl proxy will convert the HTTP based local access to HTTPS based remote access to the K8s apiserver, which requires to enter login information, as below:
 
-<img src="https://github.com/yabinmeng/kubeadm_ansible/blob/master/screenshots/login.png width=600">
+<img src="https://github.com/yabinmeng/kubeadm_ansible/blob/master/screenshots/login.png" width=600>
 
