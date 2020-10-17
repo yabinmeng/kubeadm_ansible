@@ -1,0 +1,26 @@
+---
+- name: Remove k8s dashboard related resources
+  k8s: 
+    state: absent
+    src: /tmp/k8s_dashboard.yaml
+- name: Remove Calico related resources
+  k8s:
+    state: absent
+    src: /tmp/k8s_calico.yaml
+
+- name: Get K8s node list
+  shell:
+    kubectl get nodes | tail -n +2 | awk '{print $1}'
+  register:
+    k8s_node_list
+
+- name: Set node list to a fact
+  set_fact:
+    node_list: "{{ k8s_node_list.stdout_lines }}" 
+#- debug: msg={{ node_list }}
+
+- name: Drain K8s worker nodes
+  shell:
+    kubectl drain {{ item }} --delete-local-data --force --ignore-daemonsets
+  with_items:
+    - "{{ node_list[1:] }}"

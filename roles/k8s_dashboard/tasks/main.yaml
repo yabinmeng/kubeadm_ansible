@@ -1,12 +1,12 @@
---- 
+---
 - name: Download K8s dashboard YAML 
   get_url:
-    url: "{{ url_k8s_calico }}"
-    dest: /tmp/k8s_calico.yaml
+    url: "{{ url_k8s_dashboard }}"
+    dest: /tmp/k8s_dashboard.yaml
     owner: "{{ ansible_env.SUDO_USER }}"
     group: "{{ ansible_env.SUDO_USER }}"
     force: yes
-- name: Install K8s network Calico
+- name: Deploy k8s Dashboard
   k8s:
     state: present
-    src: /tmp/k8s_calico.yaml
+    src: /tmp/k8s_dashboard.yaml

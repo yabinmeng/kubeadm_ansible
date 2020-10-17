@@ -1,29 +1,16 @@
 ---
-- hosts: master_nodes
+- hosts: master_node
   any_errors_fatal: true
   become: true
   become_method: sudo
   run_once: true
   serial: true
+  collections:
+    - community.kubernetes
   environment:
     KUBECONFIG: /home/{{ ansible_env.SUDO_USER }}/.kube/config
-  tasks:
-  - name: Get K8s node list
-    shell:
-      kubectl get nodes | tail -n +2 | awk '{print $1}'
-    register:
-      k8s_node_list
-  
-  - name: Set node list to a fact
-    set_fact:
-      node_list: "{{ k8s_node_list.stdout_lines }}" 
-  #- debug: msg={{ node_list }}
-
-  - name: Drain K8s nodes
-    shell:
-      kubectl drain {{ item }} --delete-local-data --force --ignore-daemonsets
-    with_items:
-      - "{{ node_list }}"
+  roles:
+    - { role: drain_k8s_nodes }
   
 - hosts: worker_nodes
   any_errors_fatal: true
@@ -38,7 +25,7 @@
       register:
         kubeadm_reset_shell
 
-- hosts: master_nodes
+- hosts: master_node
   any_errors_fatal: true
   become: true
   become_method: sudo

@@ -13,6 +13,12 @@ master_node_isolation: false
 # URL links for downloading docker
 url_docker_debian_pkg: https://download.docker.com/linux/ubuntu
 
+# URL link for calico
+url_k8s_calico: https://docs.projectcalico.org/v{{ calico_ver_maj }}/manifests/calico.yaml
+
+# URL links for k8s dashboard
+url_k8s_dashboard: https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.4/aio/deploy/recommended.yaml
+
 # K8s init preflight errors to ignore (comma seperated)
 # -- Value "all" to ignore all errors
 kinit_errors_to_ignore: "DirAvailable--var-lib-etcd"

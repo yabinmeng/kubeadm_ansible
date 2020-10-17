@@ -74,3 +74,11 @@
     name: openshift
     extra_args: 
       --ignore-installed
+
+- name: Create folder $HOME/.kube
+  file:
+    path: "/home/{{ ansible_env.SUDO_USER }}/.kube"
+    state: directory
+    owner: "{{ ansible_env.SUDO_USER }}"
+    group: "{{ ansible_env.SUDO_USER }}"
+    mode: 0755

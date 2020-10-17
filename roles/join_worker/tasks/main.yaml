@@ -1,9 +1,9 @@
 ---
 - name: Join K8s worker node in the cluster
   shell:
-    kubeadm join {{ hostvars[groups['master_nodes'][0]].ansible_default_ipv4.address }}:6443 \
-    --token {{ hostvars[groups['master_nodes'][0]]['bootstrap_token'] }} \
-    --discovery-token-ca-cert-hash {{ cert_hash_type }}:{{ hostvars[groups['master_nodes'][0]]['ca_cert_value'] }}
+    kubeadm join {{ hostvars[groups['master_node'][0]].ansible_default_ipv4.address }}:6443 \
+    --token {{ hostvars[groups['master_node'][0]]['bootstrap_token'] }} \
+    --discovery-token-ca-cert-hash {{ cert_hash_type }}:{{ hostvars[groups['master_node'][0]]['ca_cert_value'] }}
   register:
     kubeadm_join_shell_result
 #- debug: msg={{ kubeadm_join_shell_result }}
