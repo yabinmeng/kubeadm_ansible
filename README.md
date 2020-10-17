@@ -160,3 +160,19 @@ Now we can access the dashboard webUI through the following URL:
 
 <img src="https://github.com/yabinmeng/kubeadm_ansible/blob/master/screenshots/login.png" width=600>
 
+Token based login method is recommended and we can get the token using the following commands:
+
+* Get the first secret in K8s keyspace "kubernetes-dashboard" that is able to log in to the cluster
+
+```
+$ SECRET_NAME=$(kubectl --kubeconfig=./kubeconfig -n kubernetes-dashboard get secrets --field-selector type=kubernetes.io/service-account-token | tail -n +2 | head -n 1 | awk '{print $1}')
+$ echo $SECRET_NAME
+```
+
+* Get the token data info in the secret 
+
+```
+$ kubectl --kubeconfig=./kubeconfig -o json get secret $DFT_SECRET_NAME | jq '.data.token' | tr -d '"'
+```
+
+The above command outputs the K8s access token to the command line. Copy it and paste in the K8s dashboard login page.
