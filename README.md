@@ -194,4 +194,4 @@ token:      xxx xxxx
 
 Copy the token value and paste in the K8s dashboard login page.
 
-For more information about K8s dashboard access control, please see document [here](https://github.com/kubernetes/dashboard/blob/v2.0.0/docs/user/access-control/README.md#bearer-token)
+**NOTE**: For more information about K8s dashboard access control, please see document [here](https://github.com/kubernetes/dashboard/blob/v2.0.0/docs/user/access-control/README.md#bearer-token)
