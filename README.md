@@ -164,6 +164,8 @@ Token based login method is recommended and we can get the token using the follo
 
 * Get the first secret in K8s keyspace "kubernetes-dashboard" that is able to log in to the cluster
 
+  * **NOTE**: any secret of type "**kubernetes.io/service-account-token**" is able to log in the cluster.
+
 ```
 $ SECRET_NAME=$(kubectl --kubeconfig=./kubeconfig -n kubernetes-dashboard get secrets --field-selector type=kubernetes.io/service-account-token | tail -n +2 | head -n 1 | awk '{print $1}')
 $ echo $SECRET_NAME
