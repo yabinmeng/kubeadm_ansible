@@ -167,14 +167,29 @@ Token based login method is recommended and we can get the token using the follo
   * **NOTE**: any secret of type "**kubernetes.io/service-account-token**" is able to log in the cluster.
 
 ```
-$ SECRET_NAME=$(kubectl --kubeconfig=./kubeconfig -n kubernetes-dashboard get secrets --field-selector type=kubernetes.io/service-account-token | tail -n +2 | head -n 1 | awk '{print $1}')
-$ echo $SECRET_NAME
+$ kubectl --kubeconfig=./kubeconfig -n kubernetes-dashboard get secrets --field-selector type=kubernetes.io/service-account-token
+NAME                               TYPE                                  DATA   AGE
+default-token-7xmqm                kubernetes.io/service-account-token   3      24m
+kubernetes-dashboard-token-7sf55   kubernetes.io/service-account-token   3      24m
 ```
 
-* Get the token data info in the secret 
+* Get the token data by describing the secret 
 
 ```
-$ kubectl --kubeconfig=./kubeconfig -o json get secret $DFT_SECRET_NAME | jq '.data.token' | tr -d '"'
+$ kubectl --kubeconfig=./kubeconfig -n kubernetes-dashboard describe secret kubernetes-dashboard-token-7sf55
+Name:         kubernetes-dashboard-token-7sf55
+Namespace:    kubernetes-dashboard
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: kubernetes-dashboard
+              kubernetes.io/service-account.uid: 09214b3b-3aea-458f-92bc-07246b16adee
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1025 bytes
+namespace:  20 bytes
+token:      xxx xxxx
 ```
 
-The above command outputs the K8s access token to the command line. Copy it and paste in the K8s dashboard login page.
+Copy the token value and paste in the K8s dashboard login page.
