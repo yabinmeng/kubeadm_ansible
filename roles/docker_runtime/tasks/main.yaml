@@ -5,6 +5,7 @@
     state: present
     update_cache: yes
   with_items:
+    - python-apt
     - apt-transport-https
     - ca-certificates
     - curl
