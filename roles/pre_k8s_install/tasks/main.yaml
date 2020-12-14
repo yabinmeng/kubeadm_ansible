@@ -20,11 +20,13 @@
 - name: Check if Linux Module **br_netfilter** is enabled
   shell: lsmod | grep br_netfilter
   register: lsmod_result
+  # grep return exit code 1 when it doesn't match any lines
+  failed_when: lsmod_result.rc > 1
 
 - name: Load br_netfilter module if it is not enabled
   shell: modprobe br_netfilter
   when:
-    - lsmod_result.rc | int == 0
+    - lsmod_result.rc | int < 2
     - lsmod_result.stdout == ""
 
 - name: Make sure each Linux Node's iptables to correctly see bridged traffic

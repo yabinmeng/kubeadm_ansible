@@ -1,0 +1,12 @@
+
+[my_k8s_cluster:children]
+master_node
+worker_nodes
+
+[master_node]
+<master_node_ip>
+
+[worker_nodes]
+<worker_node1_ip>
+<worker_node2_ip>
+<worker_node3_ip>
